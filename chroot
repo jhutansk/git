@@ -1,0 +1,177 @@
+#!/bin/bash
+# chroot This shell script takes care of starting and stopping the CHROOT subsystem.
+#
+# chkconfig: - 64 36
+# description: Chroot envinroment.
+# processname: Chroot
+CHROOT_DIR=/srv/chroot/wiki
+PHP_FPM=/etc/init.d/php5-fpm
+NAGIOS=/etc/init.d/nagios
+HTTPD=/etc/init.d/httpd
+NGINX=/etc/init.d/nginx
+MYSQL=/etc/init.d/mysql
+CHROOT=/usr/sbin/chroot
+txtrst=$(tput sgr0)
+txtgreen=$(tput setaf 2)
+txtred=$(tput setaf 1)
+txtwarn=$(tput setaf 3)
+
+status(){
+        tput sgr0
+        PID_NGINX=$(cat "$CHROOT_DIR/run/nginx.pid" /dev/null 2> /dev/null )
+	PID_MYSQL=$(cat "$CHROOT_DIR/run/mysqld/mysqld.pid" /dev/null 2> /dev/null )
+	PID_FPM=$(cat "$CHROOT_DIR/run/php5-fpm.pid" /dev/null 2> /dev/null )
+	
+        echo -e "NGINX is \c "
+                    if [ "$PID_NGINX" == "" ]; then
+                        echo "not running"
+                    else
+                        echo "running with process id $PID_NGINX"
+                    fi
+
+	echo -e "PHP-FPM is \c "
+                    if [ "$PID_FPM" == "" ]; then
+                        echo "not running"
+                    else
+                        echo "running with process id $PID_FPM"
+                    fi
+
+        echo -e "MySQL is \c "
+                    if [ "$PID_MYSQL" == "" ]; then
+                        echo "not running"
+                    else
+                        echo "running with process id $PID_MYSQL"
+                    fi
+
+}
+
+start(){
+        tput sgr0
+        a=$(mount | grep "$CHROOT_DIR"/proc | wc -l)
+        b=$(mount | grep "$CHROOT_DIR"/dev | wc -l)
+
+        PID_NGINX=$(cat "$CHROOT_DIR/run/nginx.pid" /dev/null 2> /dev/null )
+        PID_MYSQL=$(cat "$CHROOT_DIR/run/mysqld/mysqld.pid" /dev/null 2> /dev/null )
+	PID_FPM=$(cat "$CHROOT_DIR/run/php5-fpm.pid" /dev/null 2> /dev/null )	
+
+        if ([ "$a" -eq 0 ] && [ "$b" -eq 0 ]);
+        then
+            mount -o bind /proc $CHROOT_DIR/proc
+            echo -e "Mounting .../proc \t\t\t\t\t\t\t\t[${txtgreen} OK ${txtrst}]"
+            mount -o bind /dev $CHROOT_DIR/dev
+            echo -e "Mounting .../dev \t\t\t\t\t\t\t\t[${txtgreen} OK ${txtrst}]"
+
+        else
+            echo -e "Mounting .../proc \t\t\t\t\t\t\t\t[${txtwarn}FAIL${txtrst}][Already mounted]"
+            echo -e "Mounting .../dev \t\t\t\t\t\t\t\t[${txtwarn}FAIL${txtrst}][Already mounted]"
+
+        fi
+
+        if [ "$PID_NGINX" == "" ]; then
+        echo -e "Starting NGINX.\t\t\t\t\t\t\t\t\t\c "
+            nohup ${CHROOT} "$CHROOT_DIR" ${NGINX} start >/dev/null 2>&1
+            echo -e "[${txtgreen} OK ${txtrst}]"
+        else
+        echo -e "Starting NGINX.\t\t\t\t\t\t\t\t\t[${txtwarn}FAIL${txtrst}][Already started]"
+        fi
+	
+	if [ "$PID_FPM" == "" ]; then
+        echo -e "Starting php-fpm.\t\t\t\t\t\t\t\t\c "
+            nohup ${CHROOT} "$CHROOT_DIR" ${PHP_FPM} start >/dev/null 2>&1
+            echo -e "[${txtgreen} OK ${txtrst}]"
+        else
+        echo -e "Starting php-fpm.\t\t\t\t\t\t\t\t[${txtwarn}FAIL${txtrst}][Already started]"
+        fi
+
+        if [ "$PID_MYSQL" == "" ]; then
+        echo -e "Starting MySQL.\t\t\t\t\t\t\t\t\t\c "
+            nohup ${CHROOT} "$CHROOT_DIR" ${MYSQL} start >/dev/null 2>&1
+            echo -e "[${txtgreen} OK ${txtrst}]"
+        else
+        echo -e "Starting MySQL.\t\t\t\t\t\t\t\t\t[${txtwarn}FAIL${txtrst}][Already started]"
+        fi
+
+}
+
+stop(){
+        tput sgr0
+        a=$(mount | grep "$CHROOT_DIR"/proc | wc -l)
+        b=$(mount | grep "$CHROOT_DIR"/dev | wc -l)
+
+	PID_NGINX=$(cat "$CHROOT_DIR/run/nginx.pid" /dev/null 2> /dev/null )
+        PID_MYSQL=$(cat "$CHROOT_DIR/run/mysqld/mysqld.pid" /dev/null 2> /dev/null )
+        PID_FPM=$(cat "$CHROOT_DIR/run/php5-fpm.pid" /dev/null 2> /dev/null )
+
+        if [ "$PID_NGINX" != "" ]; then
+        echo -e "Stoping NGINX.\t\t\t\t\t\t\t\t\t\c "
+            nohup ${CHROOT} "$CHROOT_DIR" ${NGINX} stop >/dev/null 2>&1
+            echo -e "[${txtgreen} OK ${txtrst}]"
+        else
+        echo -e "Stopping NGINX.\t\t\t\t\t\t\t\t\t[${txtred}FAIL${txtrst}][Already stopped]"
+        fi
+
+        if  [ "$PID_FPM" != "" ]; then
+        echo -e "Stopping PHP-FPM.\t\t\t\t\t\t\t\t\c "
+            nohup ${CHROOT} "$CHROOT_DIR" ${PHP_FPM} stop >/dev/null 2>&1
+            echo -e "[${txtgreen} OK ${txtrst}]"
+        else
+        echo -e "Stopping PHP-FPM.\t\t\t\t\t\t\t\t[${txtred}FAIL${txtrst}][Already stopped]"
+        fi
+
+	if  [ "$PID_MYSQL" != "" ]; then
+        echo -e "Stopping MySQL.\t\t\t\t\t\t\t\t\t\c "
+            nohup ${CHROOT} "$CHROOT_DIR" ${MYSQL} stop >/dev/null 2>&1
+            echo -e "[${txtgreen} OK ${txtrst}]"
+        else 
+        echo -e "Stopping MySQL.\t\t\t\t\t\t\t\t\t[${txtred}FAIL${txtrst}][Already stopped]"
+        fi
+
+        if  [ $a -ge 1 ] ; then
+            for (( count=1; count<=a; count++ ))
+                do
+                umount -l $CHROOT_DIR/proc
+                echo -e "Umounting .../proc \t\t\t\t\t\t\t\t[${txtgreen} OK ${txtrst}]"
+            done
+        else
+            echo -e "Umounting .../proc \t\t\t\t\t\t\t\t[${txtred}FAIL${txtrst}][Nothing to umount]"
+        fi
+
+        if  [ $b -ge 1 ] ; then
+            for (( count=1; count<=b; count++ ))
+                do
+                umount -l $CHROOT_DIR/dev
+                echo -e "Umounting .../dev \t\t\t\t\t\t\t\t[${txtgreen} OK ${txtrst}]"
+            done
+        else
+            echo -e "Umounting .../dev \t\t\t\t\t\t\t\t[${txtred}FAIL${txtrst}][Nothing to umount]"
+        fi
+
+}
+
+case "$1" in
+start)
+        start
+;;
+
+stop)
+        stop
+;;
+
+status)
+        status
+;;
+
+restart)
+        tput sgr0
+        echo -e "${txtred}Stopping${txtrst}"
+        stop
+        sleep 1
+        echo -e "${txtgreen}Starting${txtrst}"
+        start
+        ;;
+*)
+        echo "Usage: `basename $0` {start|stop|restart|status}" >&2
+        exit 64
+        ;;
+esac
+exit
