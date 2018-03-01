@@ -1,0 +1,64 @@
+<query description="Lists all Documents per Sample" name="All Documents - _Sample_ID_" type="com.ibm.team.workitem.workItemType">
+			    <select>
+			        <column attribute="id"/>
+			        <column attribute="summary"/>
+			        <column attribute="category"/>
+			        <column attribute="owner"/>
+			        <column attribute="internalState"/>
+			        <column attribute="target"/>
+			        <column attribute="dueDate"/>
+			    </select>
+			    <where>
+			        <and>
+			            <or>
+			                <condition operator="is">
+			                    <attribute name="workItemType"/>
+			                    <value content="com.ibm.team.workitem.document" type="type"/>
+			                </condition>
+			            </or>
+			            <or>
+			                <condition operator="is">
+			                    <attribute name="target"/>
+			                    <value content="_hashvalue_" type="interval"/>
+			                </condition>
+			            </or>
+			        </and>
+			    </where>
+			    <orderBy attribute="target" direction="asc"/>
+			    <orderBy attribute="id" direction="asc"/>
+</query>
+<query description="Lists all Documents per Sample" name="Open Documents - _Sample_ID_" type="com.ibm.team.workitem.workItemType">
+			    <select>
+			        <column attribute="id"/>
+			        <column attribute="summary"/>
+			        <column attribute="category"/>
+			        <column attribute="owner"/>
+			        <column attribute="internalState"/>
+			        <column attribute="target"/>
+			        <column attribute="dueDate"/>
+			    </select>
+			    <where>
+			        <and>
+			            <or>
+			                <condition operator="is">
+			                    <attribute name="workItemType"/>
+			                    <value content="com.ibm.team.workitem.document" type="type"/>
+			                </condition>
+			            </or>
+			            <or>
+			                <condition operator="is">
+			                    <attribute name="target"/>
+			                    <value content="_hashvalue_" type="interval"/>
+			                </condition>
+			            </or>
+			            <or>
+			                <condition operator="is">
+			                    <attribute name="internalState"/>
+			                    <variable arguments="open or in progress" type="state"/>
+			                </condition>
+			            </or>
+			        </and>
+			    </where>
+			    <orderBy attribute="target" direction="asc"/>
+			    <orderBy attribute="id" direction="asc"/>
+</query>
