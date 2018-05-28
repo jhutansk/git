@@ -1,22 +1,22 @@
-import tkinter
 import time
 import os
+import tkinter
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 
 def run():
     Username = entUsername.get()
     Password = entPassword.get()
     URL=entURL.get()
-    driver = webdriver.Chrome();
-    driver.get(URL);
+    driver = webdriver.Chrome()
+    #driver = webdriver.Chrome('chromedriver.exe')
+    driver.get(URL)
     time.sleep(2)
-    username = driver.find_element_by_id("jazz_app_internal_LoginWidget_0_userId");
-    password = driver.find_element_by_id("jazz_app_internal_LoginWidget_0_password");
-    username.send_keys(Username);
-    password.send_keys(Password);
-    login_attempt = driver.find_element_by_xpath("//*[@type='submit']");
-    login_attempt.submit();
+    username = driver.find_element_by_id("jazz_app_internal_LoginWidget_0_userId")
+    password = driver.find_element_by_id("jazz_app_internal_LoginWidget_0_password")
+    username.send_keys(Username)
+    password.send_keys(Password)
+    login_attempt = driver.find_element_by_xpath("//*[@type='submit']")
+    login_attempt.submit()
     time.sleep(2)
 
 #    driver.get(URL)
@@ -33,8 +33,11 @@ def run():
 
     for i in ids:
         outputName = i.get_attribute('aria-label')
-        if not (outputName == "Sample State (sample)" or outputName == "Sample State (sample_state)"):
+        if not (outputName == "Sample State (sample)" or outputName == "Sample State (sample_state)" or outputName == "Sample State"):
             output = str(i.get_attribute('aria-label'))+" "+str(i.get_attribute('entryid'))
+            textboxOutput.configure(state='normal')
+            textboxOutput.insert("end", str(i.get_attribute('aria-label'))+" "+str(i.get_attribute('entryid'))+ "\n")
+            textboxOutput.configure(state='disabled')
             with open('querries.txt','r') as f:
                 newlines = []
                 for line in f.readlines():
@@ -57,9 +60,10 @@ def run():
     time.sleep(2)
     driver.quit()
 
+
 window = tkinter.Tk()
 window.title("Query Generator")
-window.geometry("480x80")
+window.geometry("480x235")
 window.resizable(False, False)
 lblURL = tkinter.Label(window, text="URL")
 entURL = tkinter.Entry(window)
@@ -74,7 +78,7 @@ lblUsername.place(x=5, y=30)
 entUsername.pack()
 entUsername.place(x=75, y=30)
 lblPassword = tkinter.Label(window, text="Password")
-entPassword = tkinter.Entry()
+entPassword = tkinter.Entry(show='*')
 lblPassword.pack()
 lblPassword.place(x=5, y=55)
 entPassword.pack()
@@ -82,5 +86,8 @@ entPassword.place(x=75, y=55)
 btnRun = tkinter.Button(window, text="Generate", height = 2, width = 30 ,command=run)
 btnRun.pack()
 btnRun.place(x=230, y=32)
+textboxOutput = tkinter.Text(window, width = 58, height = 9, state=tkinter.DISABLED)
+textboxOutput.pack()
+textboxOutput.place(x=5, y=80)
 
 window.mainloop()

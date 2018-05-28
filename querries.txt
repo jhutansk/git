@@ -1,4 +1,4 @@
-<query description="Lists all Documents per Sample" name="All Documents - _Sample_ID_" type="com.ibm.team.workitem.workItemType">
+            <query description="Lists all Documents per Sample" name="All Documents - _Sample_ID_" type="com.ibm.team.workitem.workItemType">
 			    <select>
 			        <column attribute="id"/>
 			        <column attribute="summary"/>
@@ -26,8 +26,8 @@
 			    </where>
 			    <orderBy attribute="target" direction="asc"/>
 			    <orderBy attribute="id" direction="asc"/>
-</query>
-<query description="Lists all Documents per Sample" name="Open Documents - _Sample_ID_" type="com.ibm.team.workitem.workItemType">
+            </query>
+            <query description="Lists all Documents per Sample" name="Open Documents - _Sample_ID_" type="com.ibm.team.workitem.workItemType">
 			    <select>
 			        <column attribute="id"/>
 			        <column attribute="summary"/>
@@ -61,4 +61,4 @@
 			    </where>
 			    <orderBy attribute="target" direction="asc"/>
 			    <orderBy attribute="id" direction="asc"/>
-</query>
+            </query>
